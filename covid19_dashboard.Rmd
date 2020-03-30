@@ -1,0 +1,132 @@
+---
+title: "COVID-19 Dashboard"
+output: 
+  flexdashboard::flex_dashboard:
+    theme: cerulean
+    orientation: rows
+    vertical_layout: fill
+    social: ["twitter", "facebook", "menu"]
+---
+
+```{r setup, include=FALSE}
+library(flexdashboard)
+library(tidyverse)
+library(DT)
+library(rpivotTable)
+library(knitr)
+library(highcharter)
+library(plotly)
+```
+
+
+```{r include = FALSE}
+data <- read.csv("covid_19_data.csv", stringsAsFactors = F)
+```
+
+
+```{r include = FALSE}
+data_recent <- data %>% filter(ObservationDate %in% max(data$ObservationDate))
+```
+
+
+Home
+=======================================================================
+
+Row
+-----------------------------------------------------------------------
+
+```{r}
+global_cases <- sum(data_recent$Confirmed)
+```
+
+### `r paste("Confirmed Cases :", max(data_recent$ObservationDate))` 
+
+```{r}
+valueBox(prettyNum(global_cases, big.mark = ","),
+         color = "warning", icon = "fa-users")
+```
+
+### `r paste("Active Cases :", max(data_recent$ObservationDate))`
+
+```{r}
+active_cases <- sum(data_recent$Confirmed) - sum(data_recent$Recovered) -
+  sum(data_recent$Deaths)
+
+valueBox(prettyNum(active_cases, big.mark = ","),
+         color = "primary", icon = "fa-users")
+```
+
+### `r paste("Recovered Cases :", max(data_recent$ObservationDate))`
+
+```{r}
+valueBox(prettyNum(sum(data_recent$Recovered), big.mark = ","),
+         color = "success", icon = "fa-users")
+```
+
+### `r paste("Deceased Cases :", max(data_recent$ObservationDate))`
+
+```{r}
+valueBox(prettyNum(sum(data_recent$Deaths), big.mark = ","),
+         color = "danger", icon = "fa-users")
+```
+
+
+Row
+-----------------------------------------------------------------------
+
+```{r}
+temp_df <- data %>% group_by(ObservationDate) %>%
+              summarise(Confirmed_Cases = sum(Confirmed),
+                        Recovered_Cases = sum(Recovered),
+                        Death_Cases = sum(Deaths))
+
+```
+
+### Trend
+
+```{r}
+temp_df %>% plot_ly(x = ~ObservationDate, y = ~Confirmed_Cases, type = "scatter", mode = "line", name = "Confirmed Cases")  %>% add_trace(y = ~Recovered_Cases, name =
+                         "Recovered Cases") %>% add_trace(y = ~Death_Cases, name =
+                         "Deceased Cases") %>% layout(legend = list(x = 0.05, y = 0.9),
+                                                      yaxis = list(title = "Number of Cases"))
+```
+
+Global Presence 
+=======================================================================
+
+Column
+-----------------------------------------------------------------------
+
+### Global Spread
+
+```{r}
+
+data(worldgeojson, package = "highcharter")
+
+data_recent$Country.Region[data_recent$Country.Region  == "Mainland China"] <- "China"
+data_recent$Country.Region[data_recent$Country.Region  == "US"] <- "United States of America"
+
+data_recent %>% 
+  janitor::clean_names() %>% 
+  filter(!country_region %in% 'Others') %>% 
+  group_by(country_region) %>% 
+  summarise(total_active = sum(confirmed) - sum(recovered) - sum(deaths)) %>% 
+  filter(total_active > 0) -> countries
+
+highchart() %>%
+  hc_add_series_map(worldgeojson, countries, value = 'total_active', joinBy = c('name','country_region'))  %>% 
+  hc_colorAxis(stops = color_stops()) %>% 
+  hc_title(text = "Countries with COVID-19 Exposure") %>% 
+  hc_subtitle(text = 'Total Active Cases') 
+```
+
+Data Table
+======================================================================
+
+```{r}
+datatable(data[ , -c(1,3)], caption = "Interactive Data Table",
+          rownames = T,
+          filter = "top",
+          options = list(pageLength = 25))
+
+```
