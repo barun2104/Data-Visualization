@@ -82,7 +82,7 @@ temp_df <- data %>% group_by(ObservationDate) %>%
 
 ```
 
-### Trend
+### Global Trend
 
 ```{r}
 temp_df %>% plot_ly(x = ~ObservationDate, y = ~Confirmed_Cases, type = "scatter", mode = "line", name = "Confirmed Cases")  %>% add_trace(y = ~Recovered_Cases, name =
@@ -91,10 +91,10 @@ temp_df %>% plot_ly(x = ~ObservationDate, y = ~Confirmed_Cases, type = "scatter"
                                                       yaxis = list(title = "Number of Cases"))
 ```
 
-Global Presence 
+Countries {data-orientation=columns}
 =======================================================================
 
-Column
+Column {data-width = 700}
 -----------------------------------------------------------------------
 
 ### Global Spread
@@ -119,6 +119,34 @@ highchart() %>%
   hc_title(text = "Countries with COVID-19 Exposure") %>% 
   hc_subtitle(text = 'Total Active Cases') 
 ```
+
+
+Column {data-width = 350}
+----------------------------------------------------------------------
+
+```{r}
+temp_df <- data_recent %>% 
+                  select(Country.Region, Confirmed, Deaths, Recovered) %>%
+                  group_by(Country.Region) %>% arrange(-Confirmed) %>% head(10)
+```
+
+
+### Most Effected by Confirmed Cases
+
+```{r}
+temp_df %>% plot_ly(x = ~Country.Region, y = ~Confirmed, type = "bar", color =
+                      ~Country.Region)  %>% layout(showlegend = F,xaxis = list(title = "Country"), yaxis = list(title = "Confirmed Cases"))
+```
+
+
+### Most Effected by Deceased
+
+```{r}
+temp_df %>% plot_ly(x = ~Country.Region, y = ~Deaths, type = "bar", color =
+                      ~Country.Region)  %>% layout(showlegend = F, xaxis = list(title =
+                                            "Country"), yaxis = list(title = "Deceased Cases"))
+```
+
 
 Data Table
 ======================================================================
