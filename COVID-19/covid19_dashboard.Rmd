@@ -85,16 +85,16 @@ temp_df <- data %>% group_by(ObservationDate) %>%
 ### Global Trend
 
 ```{r}
-temp_df %>% plot_ly(x = ~ObservationDate, y = ~Confirmed_Cases, type = "scatter", mode = "line", name = "Confirmed Cases")  %>% add_trace(y = ~Recovered_Cases, name =
-                         "Recovered Cases") %>% add_trace(y = ~Death_Cases, name =
-                         "Deceased Cases") %>% layout(legend = list(x = 0.05, y = 0.9),
-                                                      yaxis = list(title = "Number of Cases"))
+temp_df %>% plot_ly(x = ~ObservationDate, y = ~Confirmed_Cases, type = "scatter", mode = "line", 
+                    name = "Confirmed Cases")  %>%  add_trace(y = ~Recovered_Cases, name = "Recovered Cases") %>% 
+                    add_trace(y = ~Death_Cases, name = "Deceased Cases") %>% 
+                    layout(legend = list(x = 0.05, y = 0.9), yaxis = list(title = "Number of Cases"))
 ```
 
-Countries {data-orientation=columns}
+Countries
 =======================================================================
 
-Column {data-width = 700}
+Row {data-height=700}
 -----------------------------------------------------------------------
 
 ### Global Spread
@@ -121,11 +121,11 @@ highchart() %>%
 ```
 
 
-Column {data-width = 350}
+Row {data-height = 300}
 ----------------------------------------------------------------------
 
 ```{r}
-temp_df <- data_recent %>% 
+temp_df <- data %>% filter(ObservationDate %in% max(data$ObservationDate)) %>% 
                   select(Country.Region, Confirmed, Deaths, Recovered) %>%
                   group_by(Country.Region) %>% arrange(-Confirmed) %>% head(10)
 ```
@@ -135,7 +135,8 @@ temp_df <- data_recent %>%
 
 ```{r}
 temp_df %>% plot_ly(x = ~Country.Region, y = ~Confirmed, type = "bar", color =
-                      ~Country.Region)  %>% layout(showlegend = F,xaxis = list(title = "Country"), yaxis = list(title = "Confirmed Cases"))
+                      ~Country.Region)  %>% layout(showlegend = F,xaxis = list(title = "Country"), 
+                      yaxis = list(title = "Confirmed Cases"))
 ```
 
 
